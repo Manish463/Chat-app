@@ -1,33 +1,39 @@
-// import express from 'express';
-// import { createServer } from 'http';
-// import { Server } from 'socket.io';
+import express from 'express';
+import { createServer } from 'http';
+import { Server } from 'socket.io';
 
-// const app = express();
-// const server = createServer(app);
+const app = express();
+const server = createServer(app);
 
-// const io = new Server(server, {
-//     cors: {
-//         origin: ["http://localhost:5173"],
-//     }
-// });
+const io = new Server(server, {
+    cors: {
+        origin: ["http://localhost:5173"],
+    }
+});
 
-// // used to store online users
-// // const userSocketMap = {};
+export function getReceverSocketId(userId) {
+    return userSocketMap[userId];
+}
 
-// io.on("connection", (socket) => {
-//     console.log("A user connected ", socket.id);
+// used to store online users
+const userSocketMap = {};
 
-//     // const userId = socket.handshake.query.userId;
-//     // if(userId) userSocketMap[userId] = socket.id;
+io.on("connection", (socket) => {
+    console.log("A user connected ", socket.id);
 
-//     // // send events to all the connected client
-//     // io.emit("getOnlineUsers", Object.keys(userSocketMap)); // return an array of keys
+    const userId = socket.handshake.query.userId;
+    if(userId) userSocketMap[userId] = socket.id;
 
-//     socket.on("disconnect", () => {
-//         console.log("A user disconnected ", socket.id);
-//         // delete userSocketMap[userId];
-//         // io.emit("getOnlineUsers", Object.keys(userSocketMap));
-//     });
-// });
+    // send events to all the connected client
+    io.emit("getOnlineUsers", Object.keys(userSocketMap)); // return an array of keys of the object
 
-// export { io, app, server };
+    socket.on("disconnect", () => {
+        console.log("A user disconnected ", socket.id);
+
+        delete userSocketMap[userId];
+        console.log(userSocketMap)
+        io.emit("getOnlineUsers", Object.keys(userSocketMap));
+    });
+});
+
+export { io, app, server };

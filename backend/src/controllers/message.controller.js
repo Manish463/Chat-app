@@ -1,6 +1,7 @@
 import User from "../models/user.model.js";
 import Message from "../models/message.model.js";
 import {v2 as cloudinary} from 'cloudinary';
+import { getReceverSocketId, io } from "../lib/socket.js";
 
 export const getUsersForSidebar = async (req, res) => {
     try {
@@ -52,7 +53,11 @@ export const sendMessage = async (req, res) => {
             image: imageUrl
         })
         await newMessage.save();
-        // socket.io related work to do
+
+        const receiverSocketId = getReceverSocketId(reciverId);
+        if(receiverSocketId) {
+            io.to(receiverSocketId).emit("newMessage", newMessage); // use to send the update to only a specific user
+        }
 
         res.status(201).json(newMessage);
     } catch (error) {
