@@ -1,19 +1,36 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useState, useRef } from 'react'
 import { useChatStore } from '../store/useChatStore'
 import SidebarSkeleton from './skeletons/SidebarSkeleton'
-import { User } from 'lucide-react';
+import { Search, User } from 'lucide-react';
 import { useAuthStore } from '../store/useAuthStore';
 
 const Sidebar = () => {
   const { users, getUsers, isUsersLoading, selectedUser, setSelectedUser } = useChatStore();
-  const [showOnlineOnly, setShowOnlineOnly] = useState(false);
   const { onlineUsers } = useAuthStore();
+  const [showOnlineOnly, setShowOnlineOnly] = useState(false);
+  const [search, setSearch] = useState('');
+  const searchRef = useRef(null);
 
   useEffect(() => {
     getUsers();
   }, [getUsers]);
 
-  const filteredUsers = showOnlineOnly ? users.filter(user => onlineUsers.includes(user._id)) : users;
+  const keyForSearch = search.trim().toLowerCase();
+  let filteredUsers = users;
+  if(keyForSearch) {
+    filteredUsers = filteredUsers.filter(user => 
+      user.fullName.toLowerCase().includes(keyForSearch)
+    );
+  }
+  if(showOnlineOnly) {
+    filteredUsers = filteredUsers.filter(user => 
+      onlineUsers.includes(user._id)
+    );
+  }
+
+  const handleChange = (key) => {
+    setSearch(key);
+  }
 
   if (isUsersLoading) return <SidebarSkeleton />
 
@@ -35,6 +52,12 @@ const Sidebar = () => {
             <span className="text-sm">Show online only</span>
           </label>
           <span className="text-xs text-zinc-500">({onlineUsers.length - 1} online)</span>
+        </div>
+        <div className='mt-3 hidden lg:flex items-center gap-2'>
+          <label className="input">
+            <Search />
+            <input type="search" className="grow" placeholder="Search" ref={searchRef} onChange={(e) => handleChange(e.target.value)} />
+          </label>
         </div>
       </div>
 
