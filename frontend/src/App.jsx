@@ -10,12 +10,13 @@ import { useAuthStore } from './store/useAuthStore';
 import { useEffect } from 'react';
 import { Toaster } from 'react-hot-toast';
 import { useThemeStore } from './store/useThemeStore';
+import ContactsPage from './pages/ContactsPage';
+import useMediaQuery from './customHook/media';
 
 const App = () => {
-  const { authUser, checkAuth, isCheckingAuth, onlineUsers } = useAuthStore();
+  const { authUser, checkAuth, isCheckingAuth } = useAuthStore();
   const { theme } = useThemeStore();
-
-  console.log("Online Users: ", onlineUsers);
+  const isBigScreen = useMediaQuery('(min-width: 768px)');
 
   useEffect(() => {
     checkAuth();
@@ -35,6 +36,7 @@ const App = () => {
 
       <Routes>
         <Route path='/' element={authUser ? <HomePage /> : <Navigate to='/login' />} />
+        <Route path='/contacts' element={isBigScreen ? <Navigate to='/' /> : <ContactsPage />} />
         <Route path='/signup' element={!authUser ? <SignUpPage /> : <Navigate to='/' />} />
         <Route path='/login' element={!authUser ? <LoginPage /> : <Navigate to='/' />} />
         <Route path='/settings' element={<SettingsPage />} />

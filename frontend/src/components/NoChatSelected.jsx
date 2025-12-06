@@ -1,4 +1,5 @@
 import {MessageSquare} from 'lucide-react';
+import { Link } from 'react-router-dom';
 
 const NoChatSelected = () => {
   return (
@@ -19,7 +20,7 @@ const NoChatSelected = () => {
         {/* Welcome Text */}
         <h2 className="text-2xl font-bold">Welcome to Chatty!</h2>
         <p className="text-base-content/60">
-          Select a conversation from the sidebar to start chatting
+          <Link to='/contacts' className='text-blue-500 font-semibold md:hidden'>Select</Link> <span className='hidden md:inline'>Select</span> a conversation to start chatting
         </p>
       </div>
     </div>

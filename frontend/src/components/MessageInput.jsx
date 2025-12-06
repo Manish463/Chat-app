@@ -11,8 +11,12 @@ const MessageInput = () => {
 
   const handleImageChange = (e) => {
     const file = e.target.files[0];
-    if(!file.type.startsWith("image/")) {
+    if (!file.type.startsWith("image/")) {
       toast.error("Please select an image file");
+      return;
+    }
+    if (file.size > 10 * 1024 * 1024) {
+      toast.error("File should less than 10MB");
       return;
     }
 
@@ -25,24 +29,37 @@ const MessageInput = () => {
 
   const removeImage = () => {
     setImagePreview(null);
-    if(fileInputRef.current) fileInputRef.current.value = "";
+    if (fileInputRef.current) fileInputRef.current.value = "";
   };
 
   const handleSendMessage = async (e) => {
     e.preventDefault();
-    if(!text.trim() && !imagePreview) return;
+    if (!text.trim() && !imagePreview) return;
 
     try {
-      await sendMessage({
-        text: text.trim(),
-        image: imagePreview,
-      });
+      if (imagePreview) {
+        toast.promise(
+          sendMessage({
+            text: text.trim(),
+            image: imagePreview,
+          }),
+          {
+            loading: "Uploading image...",
+            success: "Image uploaded successfully!",
+            error: "Failed to upload image",
+          }
+        );
+      } else {
+        sendMessage({ text: text.trim() })
+      }
+
 
       setText("");
       setImagePreview(null);
-      if(fileInputRef.current) fileInputRef.current.value = "";
+      if (fileInputRef.current) fileInputRef.current.value = "";
     } catch (error) {
-      toast.error("Failed to send message: ", error);
+      console.log("Error occured in handle send message: ", error)
+      toast.error("Failed to send message because of size ", error);
     }
   };
 
@@ -86,7 +103,7 @@ const MessageInput = () => {
 
           <button
             type="button"
-            className={`hidden sm:flex btn btn-circle
+            className={`btn btn-circle
                      ${imagePreview ? "text-emerald-500" : "text-zinc-400"}`}
             onClick={() => fileInputRef.current?.click()}
           >

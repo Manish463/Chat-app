@@ -1,4 +1,4 @@
-import { useEffect } from 'react';
+import { useEffect, useRef } from 'react';
 import { useChatStore } from '../store/useChatStore';
 import ChatHeader from './ChatHeader';
 import MessageInput from './MessageInput';
@@ -10,14 +10,18 @@ import NoMessages from './NoMessages';
 const ChatContainer = () => {
   const { messages, isMessagesLoading, selectedUser, getMessages, unsubscribeFromMessages, subscribeToMessages } = useChatStore();
   const { authUser } = useAuthStore();
+  const sRef = useRef(null);
 
   useEffect(() => {
     getMessages(selectedUser._id);
-
     subscribeToMessages();
 
     return () => unsubscribeFromMessages();
   }, [selectedUser, getMessages]);
+
+  useEffect(() => {
+    sRef.current.scrollTo(0, sRef.current.scrollHeight);
+  }, [messages]);
 
   if (isMessagesLoading) return (
     <div className='flex flex-1 flex-col overflow-auto'>
@@ -31,7 +35,7 @@ const ChatContainer = () => {
     <div className='flex flex-1 flex-col overflow-auto'>
       <ChatHeader />
 
-      <div className='flex-1 overflow-y-auto p-4 space-y-4'>
+      <div className='flex-1 overflow-y-auto p-4 space-y-4' ref={sRef}>
         {!messages.length
           ? <NoMessages />
           : messages.map((message) => (
